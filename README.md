@@ -66,6 +66,11 @@ cp apps/worker/.env.example apps/worker/.env.local
 npm run dev:worker
 ```
 
+## Reddit fetcher
+
+Use `POST /api/reddit/thread` with `{ "url": "https://www.reddit.com/r/.../comments/..." }`.
+The response includes a normalized thread and flattened comments list.
+
 ## Auth flow
 
 - Visit `/login` and request a magic link.
