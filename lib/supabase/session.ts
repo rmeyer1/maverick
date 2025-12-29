@@ -3,7 +3,7 @@ import { createClient as createBrowserClient } from "./client";
 import { createClient as createServerClient } from "./server";
 
 export async function getUserServer(): Promise<User | null> {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
     return null;
@@ -12,7 +12,7 @@ export async function getUserServer(): Promise<User | null> {
 }
 
 export async function getSessionServer() {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   return supabase.auth.getSession();
 }
 
