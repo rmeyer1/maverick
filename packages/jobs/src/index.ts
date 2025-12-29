@@ -3,3 +3,5 @@ export const queueNames = {
   extract: "extract",
   aggregate: "aggregate"
 };
+
+export { getBullmqPrefix, getRedisConnectionOptions } from "./redis";

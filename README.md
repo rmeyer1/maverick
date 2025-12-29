@@ -41,6 +41,21 @@ npm run dev:worker
 
 Open http://localhost:3000.
 
+## Redis (Upstash)
+
+Use Upstash Redis for BullMQ in serverless environments.
+
+1. Create a Redis database in Upstash.
+2. Copy the TLS connection string (starts with `rediss://`).
+3. Set environment variables in both `apps/web/.env.local` and `apps/worker/.env.local`:
+
+```bash
+REDIS_URL=rediss://:password@host:port
+BULLMQ_PREFIX=reddit-radar
+```
+
+Serverless note: API routes should only enqueue jobs. Long-lived workers connect from `apps/worker`.
+
 ## Auth flow
 
 - Visit `/login` and request a magic link.
