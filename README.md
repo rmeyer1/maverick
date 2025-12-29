@@ -26,6 +26,12 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Auth flow
+
+- Visit `/login` and request a magic link.
+- Authenticated users are redirected to `/app`.
+- Unauthenticated users are redirected to `/login`.
+
 ## Health check
 
 `GET /health` returns `{ ok: true }`.
