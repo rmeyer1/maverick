@@ -56,6 +56,15 @@ BULLMQ_PREFIX=reddit-radar
 
 Serverless note: API routes should only enqueue jobs. Long-lived workers connect from `apps/worker`.
 
+## Worker
+
+The worker process runs BullMQ processors for ingest, extract, and aggregate jobs.
+
+```bash
+cp apps/worker/.env.example apps/worker/.env.local
+npm run dev:worker
+```
+
 ## Auth flow
 
 - Visit `/login` and request a magic link.

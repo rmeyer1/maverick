@@ -3,7 +3,7 @@ import { z } from "zod";
 export const jobNames = {
   ingestThread: "INGEST_THREAD",
   extractThread: "EXTRACT_THREAD",
-  aggregateTrends: "AGGREGATE_TRENDS",
+  aggregateTrends: "AGGREGATE_DAILY",
 } as const;
 
 export type JobName = (typeof jobNames)[keyof typeof jobNames];
