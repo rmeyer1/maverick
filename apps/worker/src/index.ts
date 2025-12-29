@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { Worker } from "bullmq";
 import {
   getBullmqPrefix,
@@ -9,7 +10,14 @@ import {
   queueNames,
 } from "@maverick/jobs";
 import { createSupabaseAdminClient, saveThreadWithComments } from "@maverick/db";
-import { normalizeRedditThread } from "@maverick/shared";
+import {
+  extractionPromptVersion,
+  extractionSchemaVersion,
+  extractionSchemaV1,
+  normalizeRedditThread,
+  validateExtractionV1,
+} from "@maverick/shared";
+import { generateJson } from "@maverick/llm";
 
 const connection = getRedisConnectionOptions();
 const prefix = getBullmqPrefix();
@@ -31,6 +39,40 @@ function logComplete(queue: string, jobId: string, ms: number) {
 function logFailure(queue: string, jobId: string, error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`[worker] fail ${queue} job=${jobId} error=${message}`);
+}
+
+let promptTemplateCache: string | null = null;
+
+async function loadPromptTemplate() {
+  if (promptTemplateCache) return promptTemplateCache;
+  const url = new URL("../../../prompts/extract.v1.md", import.meta.url);
+  promptTemplateCache = await readFile(url, "utf-8");
+  return promptTemplateCache;
+}
+
+function buildExtractionPrompt(thread: Record<string, unknown>, comments: unknown[]) {
+  return loadPromptTemplate().then((template) =>
+    template
+      .replace("{{thread_json}}", JSON.stringify(thread, null, 2))
+      .replace("{{comments_json}}", JSON.stringify(comments, null, 2))
+  );
+}
+
+function getTopCommentLimit() {
+  return Number(process.env.EXTRACT_TOP_COMMENTS ?? 20);
+}
+
+function getDefaultProvider() {
+  return process.env.LLM_PROVIDER_DEFAULT ?? "openai";
+}
+
+function getDefaultModel() {
+  return process.env.LLM_MODEL_DEFAULT ?? "default";
+}
+
+function getTemperature() {
+  const value = Number(process.env.LLM_TEMPERATURE ?? 0.2);
+  return Number.isNaN(value) ? 0.2 : value;
 }
 
 const allowedHosts = new Set([
@@ -133,7 +175,101 @@ const extractWorker = new Worker(
       `[worker] extract payload threadId=${payload.threadId} provider=${payload.provider ?? "n/a"}`
     );
 
-    // TODO: load thread + comments, call LLM, persist extraction.
+    const supabase = createSupabaseAdminClient();
+    const provider = payload.provider ?? getDefaultProvider();
+    const model = payload.model ?? getDefaultModel();
+
+    const { data: thread, error: threadError } = await supabase
+      .from("thread")
+      .select("id,title,author,url,created_utc,raw_json")
+      .eq("id", payload.threadId)
+      .single();
+
+    if (threadError || !thread) {
+      throw threadError ?? new Error("Thread not found for extraction.");
+    }
+
+    const { data: comments, error: commentError } = await supabase
+      .from("comment")
+      .select("author,body,score,created_utc,reddit_id,parent_reddit_id")
+      .eq("thread_id", payload.threadId)
+      .order("score", { ascending: false, nullsFirst: false })
+      .limit(getTopCommentLimit());
+
+    if (commentError) {
+      throw commentError;
+    }
+
+    const existingExtraction = await supabase
+      .from("extraction")
+      .select("id")
+      .eq("thread_id", payload.threadId)
+      .eq("schema_version", extractionSchemaVersion)
+      .eq("prompt_version", extractionPromptVersion)
+      .eq("provider", provider)
+      .eq("model", model)
+      .maybeSingle();
+
+    if (existingExtraction.data?.id) {
+      console.log(
+        `[worker] extraction exists threadId=${payload.threadId} extractionId=${existingExtraction.data.id}`
+      );
+      logComplete(queueNames.extract, job.id ?? "unknown", Date.now() - start);
+      return;
+    }
+
+    const prompt = await buildExtractionPrompt(
+      {
+        title: thread.title,
+        author: thread.author,
+        url: thread.url,
+        created_utc: thread.created_utc,
+        selftext:
+          typeof (thread.raw_json as Record<string, unknown> | null)?.selftext ===
+          "string"
+            ? (thread.raw_json as Record<string, unknown>).selftext
+            : null,
+      },
+      (comments ?? []).map((comment) => ({
+        author: comment.author,
+        body: comment.body,
+        score: comment.score,
+        created_utc: comment.created_utc,
+        reddit_id: comment.reddit_id,
+        parent_reddit_id: comment.parent_reddit_id,
+      }))
+    );
+
+    const llmResponse = await generateJson({
+      provider,
+      model,
+      prompt,
+      schema: extractionSchemaV1,
+      temperature: getTemperature(),
+    });
+
+    const validated = validateExtractionV1(llmResponse.data);
+
+    const { error: extractionError } = await supabase
+      .from("extraction")
+      .upsert(
+        {
+          thread_id: payload.threadId,
+          provider,
+          model,
+          prompt_version: extractionPromptVersion,
+          schema_version: extractionSchemaVersion,
+          status: "succeeded",
+          output: validated,
+          extracted_json: validated,
+        },
+        { onConflict: "thread_id,schema_version,prompt_version,provider,model" }
+      );
+
+    if (extractionError) {
+      throw extractionError;
+    }
+
     logComplete(queueNames.extract, job.id ?? "unknown", Date.now() - start);
   },
   {
