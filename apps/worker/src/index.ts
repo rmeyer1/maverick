@@ -8,7 +8,8 @@ import {
   parseIngestThreadPayload,
   queueNames,
 } from "@maverick/jobs";
-import { createSupabaseAdminClient } from "@maverick/db";
+import { createSupabaseAdminClient, saveThreadWithComments } from "@maverick/db";
+import { normalizeRedditThread } from "@maverick/shared";
 
 const connection = getRedisConnectionOptions();
 const prefix = getBullmqPrefix();
@@ -32,6 +33,58 @@ function logFailure(queue: string, jobId: string, error: unknown) {
   console.error(`[worker] fail ${queue} job=${jobId} error=${message}`);
 }
 
+const allowedHosts = new Set([
+  "reddit.com",
+  "www.reddit.com",
+  "old.reddit.com",
+  "new.reddit.com",
+  "redd.it",
+]);
+
+async function fetchRedditThread(url: string) {
+  const parsed = new URL(url);
+  if (!allowedHosts.has(parsed.hostname)) {
+    throw new Error(`Unsupported reddit host: ${parsed.hostname}`);
+  }
+
+  const jsonUrl = buildJsonUrl(parsed);
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    Number(process.env.REDDIT_FETCH_TIMEOUT_MS ?? 8000)
+  );
+
+  try {
+    const response = await fetch(jsonUrl, {
+      headers: {
+        "User-Agent": "maverick-worker/0.1",
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Reddit fetch failed with status ${response.status}`);
+    }
+
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function buildJsonUrl(url: URL) {
+  if (url.hostname === "redd.it") {
+    const id = url.pathname.replace("/", "").trim();
+    return `https://www.reddit.com/comments/${id}.json`;
+  }
+
+  if (url.pathname.endsWith(".json")) {
+    return url.toString();
+  }
+
+  return `${url.origin}${url.pathname}.json`;
+}
+
 const ingestWorker = new Worker(
   queueNames.ingest,
   async (job) => {
@@ -44,7 +97,21 @@ const ingestWorker = new Worker(
       `[worker] ingest payload url=${payload.threadUrl} requestedBy=${payload.requestedBy ?? "n/a"}`
     );
 
-    // TODO: fetch Reddit thread JSON and persist to Supabase.
+    const raw = await fetchRedditThread(payload.threadUrl);
+    const normalized = normalizeRedditThread(raw);
+
+    const result = await saveThreadWithComments(
+      normalized.thread,
+      normalized.comments,
+      {
+        ingestedByUserId: payload.requestedBy ?? null,
+        fetchedAt: new Date(),
+      }
+    );
+
+    console.log(
+      `[worker] ingest saved threadId=${result.threadId} comments=${result.commentCount}`
+    );
     logComplete(queueNames.ingest, job.id ?? "unknown", Date.now() - start);
   },
   {
