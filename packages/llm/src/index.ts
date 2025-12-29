@@ -4,7 +4,7 @@ export type {
   LLMProvider,
   ProviderFactoryOptions,
   RetryOptions,
-} from "./types";
+} from "./types.js";
 export {
   LLMError,
   LLMConfigError,
@@ -12,12 +12,12 @@ export {
   LLMRateLimitError,
   LLMTransientError,
   isRetryableError,
-} from "./errors";
-export { generateJson, providerFactory } from "./providerFactory";
-export { redactSensitive, redactText } from "./redaction";
-export { createStubFromSchema } from "./dryRun";
-export { providerRegistry } from "./providerRegistry";
-export { createOpenAIProvider } from "./providers/openai";
-export { createGeminiProvider } from "./providers/gemini";
-export { createXaiProvider } from "./providers/xai";
-export { createDeepseekProvider } from "./providers/deepseek";
+} from "./errors.js";
+export { generateJson, providerFactory } from "./providerFactory.js";
+export { redactSensitive, redactText } from "./redaction.js";
+export { createStubFromSchema } from "./dryRun.js";
+export { providerRegistry } from "./providerRegistry.js";
+export { createOpenAIProvider } from "./providers/openai.js";
+export { createGeminiProvider } from "./providers/gemini.js";
+export { createXaiProvider } from "./providers/xai.js";
+export { createDeepseekProvider } from "./providers/deepseek.js";

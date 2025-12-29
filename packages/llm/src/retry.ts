@@ -1,5 +1,5 @@
-import { isRetryableError } from "./errors";
-import type { RetryOptions } from "./types";
+import { isRetryableError } from "./errors.js";
+import type { RetryOptions } from "./types.js";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

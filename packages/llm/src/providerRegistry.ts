@@ -1,8 +1,8 @@
-import type { LLMProvider } from "./types";
-import { createOpenAIProvider } from "./providers/openai";
-import { createGeminiProvider } from "./providers/gemini";
-import { createXaiProvider } from "./providers/xai";
-import { createDeepseekProvider } from "./providers/deepseek";
+import type { LLMProvider } from "./types.js";
+import { createOpenAIProvider } from "./providers/openai.js";
+import { createGeminiProvider } from "./providers/gemini.js";
+import { createXaiProvider } from "./providers/xai.js";
+import { createDeepseekProvider } from "./providers/deepseek.js";
 
 export const providerRegistry: Record<
   string,

@@ -1,5 +1,9 @@
-import type { GenerateJsonArgs, GenerateJsonResult, LLMProvider } from "../types";
-import { LLMConfigError, LLMProviderError } from "../errors";
+import type {
+  GenerateJsonArgs,
+  GenerateJsonResult,
+  LLMProvider,
+} from "../types.js";
+import { LLMConfigError, LLMProviderError } from "../errors.js";
 
 export function createOpenAIProvider(
   env: Record<string, string | undefined> = process.env
