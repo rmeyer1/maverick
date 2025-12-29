@@ -154,13 +154,11 @@ export default function NewThreadPage() {
       setExtractJobId(extractJobId);
 
       await pollJob(extractRunId);
-      const finalThreadId =
-        threadId ?? resolvedThreadId ?? (await lookupThread(redditId));
-      if (!finalThreadId) {
+      if (!resolvedThreadId) {
         throw new Error("Thread ID missing after extraction.");
       }
       setStatus("done");
-      router.push(`/app/thread/${finalThreadId}`);
+      router.push(`/app/thread/${resolvedThreadId}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
