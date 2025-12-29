@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExtractionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "pain_points",
+    "buying_intent",
+    "requested_solutions",
+    "entities",
+    "market_tags"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "pain_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["problem", "evidence", "severity"],
+        "properties": {
+          "problem": { "type": "string" },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          }
+        }
+      }
+    },
+    "buying_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "signals"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["none", "low", "medium", "high"]
+        },
+        "signals": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "budget": { "type": ["string", "null"] },
+        "timeline": { "type": ["string", "null"] }
+      }
+    },
+    "requested_solutions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "entities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["companies", "products", "competitors"],
+      "properties": {
+        "companies": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "products": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "competitors": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "market_tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
