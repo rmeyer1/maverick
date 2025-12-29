@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ["@maverick/shared", "@maverick/db", "@maverick/jobs"],
 };
 
 export default nextConfig;

@@ -1,0 +1,7 @@
+{
+  "rootDirectory": "apps/web",
+  "buildCommand": "npm run build --workspace @maverick/web",
+  "installCommand": "npm install",
+  "outputDirectory": "apps/web/.next",
+  "framework": "nextjs"
+}
