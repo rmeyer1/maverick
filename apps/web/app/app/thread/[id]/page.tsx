@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 
 const pollIntervalMs = 2000;
 
@@ -37,7 +38,9 @@ type ThreadResponse = {
   extraction: ExtractionData | null;
 };
 
-export default function ThreadPage({ params }: { params: { id: string } }) {
+export default function ThreadPage() {
+  const params = useParams<{ id: string }>();
+  const threadId = params?.id ?? "";
   const [data, setData] = useState<ThreadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +53,10 @@ export default function ThreadPage({ params }: { params: { id: string } }) {
 
     async function fetchThread() {
       try {
-        const response = await fetch(`/api/threads/${params.id}`);
+        if (!threadId) {
+          throw new Error("Missing thread id in route.");
+        }
+        const response = await fetch(`/api/threads/${threadId}`);
         if (!response.ok) {
           const payload = await response.json();
           throw new Error(payload?.error ?? "Failed to load thread");
@@ -78,7 +84,7 @@ export default function ThreadPage({ params }: { params: { id: string } }) {
       isMounted = false;
       if (timer) clearTimeout(timer);
     };
-  }, [params.id]);
+  }, [threadId]);
 
   const buyingIntent = extraction?.buying_intent ?? null;
   const painPoints = extraction?.pain_points ?? [];
