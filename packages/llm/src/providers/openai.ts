@@ -32,12 +32,7 @@ export function createOpenAIProvider(
           temperature: args.temperature ?? 0.2,
           max_tokens: args.maxTokens,
           response_format: {
-            type: "json_schema",
-            json_schema: {
-              name: "extraction",
-              strict: true,
-              schema: buildJsonSchema(args.schema),
-            },
+            type: "json_object",
           },
           messages: [
             ...(args.system ? [{ role: "system", content: args.system }] : []),
