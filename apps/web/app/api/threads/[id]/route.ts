@@ -3,14 +3,16 @@ import { createSupabaseAdminClient } from "@maverick/db";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createSupabaseAdminClient();
+
+  const { id } = await params;
 
   const { data: thread, error: threadError } = await supabase
     .from("thread")
     .select("id,title,author,url,created_utc,raw_json")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (threadError || !thread) {
