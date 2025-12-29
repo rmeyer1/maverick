@@ -30,4 +30,4 @@ export function createSupabaseAdminClient(
   return adminClient;
 }
 
-export { saveThreadWithComments } from "./reddit";
+export { saveThreadWithComments } from "./reddit.js";
