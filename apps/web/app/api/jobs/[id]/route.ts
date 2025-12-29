@@ -3,24 +3,10 @@ import { createSupabaseAdminClient } from "@maverick/db";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = params.id;
+  const { id } = await params;
   const supabase = createSupabaseAdminClient();
-
-  const { data: jobByBullmq, error: bullmqError } = await supabase
-    .from("job_run")
-    .select("*")
-    .eq("bullmq_job_id", id)
-    .maybeSingle();
-
-  if (bullmqError) {
-    return NextResponse.json({ error: "job_lookup_failed" }, { status: 500 });
-  }
-
-  if (jobByBullmq) {
-    return NextResponse.json(jobByBullmq);
-  }
 
   const { data: jobById, error: idError } = await supabase
     .from("job_run")
@@ -32,9 +18,24 @@ export async function GET(
     return NextResponse.json({ error: "job_lookup_failed" }, { status: 500 });
   }
 
-  if (!jobById) {
+  if (jobById) {
+    return NextResponse.json(jobById);
+  }
+
+  const { data: jobByBullmq, error: bullmqError } = await supabase
+    .from("job_run")
+    .select("*")
+    .eq("bullmq_job_id", id)
+    .order("created_at", { ascending: false })
+    .maybeSingle();
+
+  if (bullmqError) {
+    return NextResponse.json({ error: "job_lookup_failed" }, { status: 500 });
+  }
+
+  if (!jobByBullmq) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  return NextResponse.json(jobById);
+  return NextResponse.json(jobByBullmq);
 }

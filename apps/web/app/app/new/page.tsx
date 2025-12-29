@@ -126,9 +126,10 @@ export default function NewThreadPage() {
 
       const ingestPayload = await ingestResponse.json();
       const ingestJobId = String(ingestPayload.jobId);
+      const ingestRunId = String(ingestPayload.jobRunId ?? ingestJobId);
       setJobId(ingestJobId);
 
-      await pollJob(ingestJobId);
+      await pollJob(ingestRunId);
 
       setStatus("waiting_for_thread");
       const threadId = await lookupThread(redditId);
@@ -147,9 +148,10 @@ export default function NewThreadPage() {
 
       const extractPayload = await extractResponse.json();
       const extractJobId = String(extractPayload.jobId);
+      const extractRunId = String(extractPayload.jobRunId ?? extractJobId);
       setExtractJobId(extractJobId);
 
-      await pollJob(extractJobId);
+      await pollJob(extractRunId);
       setStatus("done");
       router.push(`/app/thread/${threadId}`);
     } catch (err) {

@@ -17,6 +17,8 @@ export { generateJson, providerFactory } from "./providerFactory.js";
 export { redactSensitive, redactText } from "./redaction.js";
 export { createStubFromSchema } from "./dryRun.js";
 export { providerRegistry } from "./providerRegistry.js";
+export { buildJsonSchema } from "./jsonSchema.js";
+export { parseJsonResponse } from "./parseJson.js";
 export { createOpenAIProvider } from "./providers/openai.js";
 export { createGeminiProvider } from "./providers/gemini.js";
 export { createXaiProvider } from "./providers/xai.js";
