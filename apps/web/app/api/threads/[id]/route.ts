@@ -24,7 +24,7 @@ export async function GET(
     .select(
       "provider,model,prompt_version,schema_version,status,extracted_json,created_at"
     )
-    .eq("thread_id", params.id)
+    .eq("thread_id", id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -32,7 +32,7 @@ export async function GET(
   const { data: comments } = await supabase
     .from("comment")
     .select("author,body,score,created_utc,reddit_id,parent_reddit_id")
-    .eq("thread_id", params.id)
+    .eq("thread_id", id)
     .order("score", { ascending: false, nullsFirst: false })
     .limit(20);
 
