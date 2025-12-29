@@ -13,7 +13,8 @@
   "dependencies": {
     "@maverick/db": "file:../../packages/db",
     "@maverick/jobs": "file:../../packages/jobs",
-    "@maverick/shared": "file:../../packages/shared"
+    "@maverick/shared": "file:../../packages/shared",
+    "bullmq": "^5.18.1"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
