@@ -46,7 +46,8 @@ let promptTemplateCache: string | null = null;
 
 async function loadPromptTemplate() {
   if (promptTemplateCache) return promptTemplateCache;
-  const promptPath = path.resolve(process.cwd(), "prompts", "extract.v1.md");
+  const repoRoot = path.resolve(process.cwd(), "..", "..");
+  const promptPath = path.join(repoRoot, "prompts", "extract.v1.md");
   promptTemplateCache = await readFile(promptPath, "utf-8");
   return promptTemplateCache;
 }

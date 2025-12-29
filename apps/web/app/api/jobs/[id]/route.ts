@@ -3,9 +3,9 @@ import { createSupabaseAdminClient } from "@maverick/db";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = params.id;
+  const { id } = await params;
   const supabase = createSupabaseAdminClient();
 
   const { data: jobByBullmq, error: bullmqError } = await supabase
