@@ -31,6 +31,7 @@ export default function NewThreadPage() {
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [extractJobId, setExtractJobId] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
 
   const isBusy = status !== "idle" && status !== "done";
 
@@ -132,13 +133,14 @@ export default function NewThreadPage() {
       await pollJob(ingestRunId);
 
       setStatus("waiting_for_thread");
-      const threadId = await lookupThread(redditId);
+      const resolvedThreadId = await lookupThread(redditId);
+      setThreadId(resolvedThreadId);
 
       setStatus("extracting");
       const extractResponse = await fetch("/api/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ threadId, provider, model }),
+        body: JSON.stringify({ threadId: resolvedThreadId, provider, model }),
       });
 
       if (!extractResponse.ok) {
@@ -152,8 +154,13 @@ export default function NewThreadPage() {
       setExtractJobId(extractJobId);
 
       await pollJob(extractRunId);
+      const finalThreadId =
+        threadId ?? resolvedThreadId ?? (await lookupThread(redditId));
+      if (!finalThreadId) {
+        throw new Error("Thread ID missing after extraction.");
+      }
       setStatus("done");
-      router.push(`/app/thread/${threadId}`);
+      router.push(`/app/thread/${finalThreadId}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
@@ -235,6 +242,9 @@ export default function NewThreadPage() {
           </div>
           {jobId ? (
             <p className="text-xs text-zinc-500">Ingest job: {jobId}</p>
+          ) : null}
+          {threadId ? (
+            <p className="text-xs text-zinc-500">Thread id: {threadId}</p>
           ) : null}
           {extractJobId ? (
             <p className="text-xs text-zinc-500">Extract job: {extractJobId}</p>
