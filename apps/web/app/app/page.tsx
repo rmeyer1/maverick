@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getUserServer } from "@/lib/supabase/session";
 
 export default async function AppPage() {
@@ -20,6 +21,12 @@ export default async function AppPage() {
           <p className="mt-2 text-sm text-zinc-600">
             Queue Reddit threads for analysis and monitor job progress.
           </p>
+          <Link
+            href="/app/new"
+            className="mt-4 inline-flex rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white"
+          >
+            New analysis
+          </Link>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h3 className="text-lg font-semibold">Extraction</h3>
