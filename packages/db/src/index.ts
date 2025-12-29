@@ -29,3 +29,5 @@ export function createSupabaseAdminClient(
 
   return adminClient;
 }
+
+export { saveThreadWithComments } from "./reddit";
