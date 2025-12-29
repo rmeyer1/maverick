@@ -10,6 +10,10 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "bullmq": "^5.18.1",
+    "zod": "^3.25.8"
+  },
   "devDependencies": {
     "typescript": "^5"
   }
