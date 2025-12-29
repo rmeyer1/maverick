@@ -1,6 +1,43 @@
 import type { ZodTypeAny } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
+type JsonSchema = Record<string, any>;
+
+function enforceAdditionalProperties(schema: JsonSchema): JsonSchema {
+  if (!schema || typeof schema !== "object") return schema;
+
+  if (schema.type === "object") {
+    if (schema.additionalProperties === undefined) {
+      schema.additionalProperties = false;
+    }
+    if (schema.properties) {
+      for (const value of Object.values(schema.properties)) {
+        enforceAdditionalProperties(value as JsonSchema);
+      }
+    }
+    if (schema.patternProperties) {
+      for (const value of Object.values(schema.patternProperties)) {
+        enforceAdditionalProperties(value as JsonSchema);
+      }
+    }
+  }
+
+  if (schema.items) {
+    enforceAdditionalProperties(schema.items as JsonSchema);
+  }
+
+  for (const key of ["oneOf", "anyOf", "allOf", "not"]) {
+    const entry = schema[key];
+    if (Array.isArray(entry)) {
+      entry.forEach((item) => enforceAdditionalProperties(item as JsonSchema));
+    } else if (entry && typeof entry === "object") {
+      enforceAdditionalProperties(entry as JsonSchema);
+    }
+  }
+
+  return schema;
+}
+
 export function buildJsonSchema(schema: ZodTypeAny, name = "response") {
   const jsonSchema = zodToJsonSchema(schema, {
     name,
@@ -25,14 +62,10 @@ export function buildJsonSchema(schema: ZodTypeAny, name = "response") {
     }
 
     if (schemaObject && typeof schemaObject === "object") {
-      const root = schemaObject as Record<string, unknown>;
-      if (root.type === "object" && root.additionalProperties === undefined) {
-        root.additionalProperties = false;
-      }
-      return root;
+      return enforceAdditionalProperties(schemaObject as JsonSchema);
     }
     return schemaObject;
   }
 
-  return jsonSchema;
+  return enforceAdditionalProperties(jsonSchema as JsonSchema);
 }
