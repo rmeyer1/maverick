@@ -13,6 +13,7 @@
   "dependencies": {
     "@maverick/db": "file:../../packages/db",
     "@maverick/jobs": "file:../../packages/jobs",
+    "@maverick/llm": "file:../../packages/llm",
     "@maverick/shared": "file:../../packages/shared",
     "bullmq": "^5.18.1"
   },
