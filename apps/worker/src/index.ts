@@ -8,6 +8,7 @@ import {
   parseIngestThreadPayload,
   queueNames,
 } from "@maverick/jobs";
+import { createSupabaseAdminClient } from "@maverick/db";
 
 const connection = getRedisConnectionOptions();
 const prefix = getBullmqPrefix();
@@ -97,9 +98,27 @@ const aggregateWorker = new Worker(
   }
 );
 
+async function updateJobRun(jobId: string, data: Record<string, unknown>) {
+  const supabase = createSupabaseAdminClient();
+  await supabase.from("job_run").update(data).eq("bullmq_job_id", jobId);
+}
+
 [ingestWorker, extractWorker, aggregateWorker].forEach((worker) => {
-  worker.on("failed", (job, err) => {
+  worker.on("active", async (job) => {
+    if (!job?.id) return;
+    await updateJobRun(String(job.id), { status: "active", progress: 0 });
+  });
+
+  worker.on("completed", async (job) => {
+    if (!job?.id) return;
+    await updateJobRun(String(job.id), { status: "completed", progress: 100 });
+  });
+
+  worker.on("failed", async (job, err) => {
     logFailure(worker.name, job?.id ?? "unknown", err);
+    if (!job?.id) return;
+    const message = err instanceof Error ? err.message : String(err);
+    await updateJobRun(String(job.id), { status: "failed", error: message });
   });
 });
 

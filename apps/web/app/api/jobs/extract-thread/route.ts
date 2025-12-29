@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { enqueueExtractThread, extractThreadSchema } from "@maverick/jobs";
+import { enqueueExtractThread, extractThreadSchema, queueNames, jobNames } from "@maverick/jobs";
+import { createSupabaseAdminClient } from "@maverick/db";
 import { getClientKey, rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
@@ -37,9 +38,25 @@ export async function POST(request: Request) {
   }
 
   const job = await enqueueExtractThread(parsed.data);
+  const supabase = createSupabaseAdminClient();
+  const { data: jobRun, error } = await supabase
+    .from("job_run")
+    .insert({
+      bullmq_job_id: String(job.id),
+      queue: queueNames.extract,
+      type: jobNames.extractThread,
+      status: "queued",
+      progress: 0,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: "job_run_insert_failed" }, { status: 500 });
+  }
 
   return NextResponse.json(
-    { jobId: job.id, status: "queued" },
+    { jobId: job.id, jobRunId: jobRun?.id, status: "queued" },
     {
       headers: {
         "x-ratelimit-remaining": String(remaining),
