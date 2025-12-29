@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { Worker } from "bullmq";
 import {
   getBullmqPrefix,
@@ -45,8 +46,8 @@ let promptTemplateCache: string | null = null;
 
 async function loadPromptTemplate() {
   if (promptTemplateCache) return promptTemplateCache;
-  const url = new URL("../../../prompts/extract.v1.md", import.meta.url);
-  promptTemplateCache = await readFile(url, "utf-8");
+  const promptPath = path.resolve(process.cwd(), "prompts", "extract.v1.md");
+  promptTemplateCache = await readFile(promptPath, "utf-8");
   return promptTemplateCache;
 }
 
