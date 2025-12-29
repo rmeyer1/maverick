@@ -1,0 +1,78 @@
+[
+  {
+    "data": {
+      "children": [
+        {
+          "data": {
+            "name": "t3_abc123",
+            "id": "abc123",
+            "title": "Test thread",
+            "author": "op_user",
+            "created_utc": 1700000000,
+            "url": "https://www.reddit.com/r/test/comments/abc123/test_thread",
+            "permalink": "/r/test/comments/abc123/test_thread",
+            "score": 10,
+            "num_comments": 2,
+            "subreddit": "test"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "children": [
+        {
+          "kind": "t1",
+          "data": {
+            "name": "t1_c1",
+            "parent_id": "t3_abc123",
+            "depth": 0,
+            "score": 5,
+            "author": "user1",
+            "created_utc": 1700000001,
+            "body": "hello",
+            "replies": {
+              "data": {
+                "children": [
+                  {
+                    "kind": "t1",
+                    "data": {
+                      "name": "t1_c2",
+                      "parent_id": "t1_c1",
+                      "depth": 1,
+                      "score": 2,
+                      "author": "user2",
+                      "created_utc": 1700000002,
+                      "body": "reply",
+                      "replies": ""
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "kind": "t1",
+          "data": {
+            "name": "t1_c3",
+            "parent_id": "t3_abc123",
+            "depth": 0,
+            "score": 1,
+            "author": null,
+            "created_utc": 1700000003,
+            "body": "[deleted]",
+            "replies": ""
+          }
+        },
+        {
+          "kind": "more",
+          "data": {
+            "children": []
+          }
+        }
+      ]
+    }
+  }
+]
