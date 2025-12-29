@@ -25,6 +25,7 @@ cp apps/web/.env.example apps/web/.env.local
 ```
 
 Then fill in your Supabase values in `apps/web/.env.local`.
+For job tracking, also set `SUPABASE_SERVICE_ROLE_KEY` (server-side only) in both web and worker env files.
 
 3. Start development:
 
