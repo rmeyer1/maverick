@@ -303,27 +303,44 @@ const aggregateWorker = new Worker(
   }
 );
 
-async function updateJobRun(jobId: string, data: Record<string, unknown>) {
+async function updateJobRun(
+  jobId: string,
+  queue: string,
+  data: Record<string, unknown>
+) {
   const supabase = createSupabaseAdminClient();
-  await supabase.from("job_run").update(data).eq("bullmq_job_id", jobId);
+  await supabase
+    .from("job_run")
+    .update(data)
+    .eq("bullmq_job_id", jobId)
+    .eq("queue", queue);
 }
 
 [ingestWorker, extractWorker, aggregateWorker].forEach((worker) => {
   worker.on("active", async (job) => {
     if (!job?.id) return;
-    await updateJobRun(String(job.id), { status: "active", progress: 0 });
+    await updateJobRun(String(job.id), worker.name, {
+      status: "active",
+      progress: 0,
+    });
   });
 
   worker.on("completed", async (job) => {
     if (!job?.id) return;
-    await updateJobRun(String(job.id), { status: "completed", progress: 100 });
+    await updateJobRun(String(job.id), worker.name, {
+      status: "completed",
+      progress: 100,
+    });
   });
 
   worker.on("failed", async (job, err) => {
     logFailure(worker.name, job?.id ?? "unknown", err);
     if (!job?.id) return;
     const message = err instanceof Error ? err.message : String(err);
-    await updateJobRun(String(job.id), { status: "failed", error: message });
+    await updateJobRun(String(job.id), worker.name, {
+      status: "failed",
+      error: message,
+    });
   });
 });
 
