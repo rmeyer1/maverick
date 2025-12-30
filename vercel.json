@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm run build --workspace @maverick/web",
   "installCommand": "npm install --include=optional",
+  "buildCommand": "TAILWIND_DISABLE_LIGHTNINGCSS=1 NEXT_DISABLE_TURBOPACK=1 npm run build --workspace @maverick/web",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs"
 }
