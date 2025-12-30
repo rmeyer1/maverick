@@ -71,6 +71,11 @@ npm run dev:worker
 Use `POST /api/reddit/thread` with `{ "url": "https://www.reddit.com/r/.../comments/..." }`.
 The response includes a normalized thread and flattened comments list.
 
+## Cron jobs
+
+- Vercel Cron (configured in `vercel.json`) triggers `POST /api/cron/nightly` daily around 2:15am ET (07:15 UTC).
+- Protect the endpoint with `CRON_SECRET` and include it as either an `x-cron-secret` header or `Authorization: Bearer <secret>` in the cron request.
+
 ## Auth flow
 
 - Visit `/login` and request a magic link.
