@@ -39,11 +39,11 @@ function enforceAdditionalProperties(schema: JsonSchema): JsonSchema {
 }
 
 export function buildJsonSchema(schema: ZodTypeAny, name = "response") {
-  const jsonSchema = zodToJsonSchema(schema, {
+  const jsonSchema = zodToJsonSchema(schema as any, {
     name,
     $refStrategy: "none",
     target: "openApi3",
-  });
+  }) as any;
 
   if (jsonSchema && typeof jsonSchema === "object") {
     const { $schema, ...rest } = jsonSchema as Record<string, unknown>;
