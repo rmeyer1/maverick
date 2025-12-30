@@ -33,11 +33,19 @@ function LoginForm() {
     setStatus("loading");
     setMessage("");
 
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      process.env.NEXT_PUBLIC_VERCEL_URL ??
+      window.location.origin;
+    const normalizedBaseUrl = baseUrl.startsWith("http")
+      ? baseUrl
+      : `https://${baseUrl}`;
+
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+        emailRedirectTo: `${normalizedBaseUrl}/auth/callback?next=${encodeURIComponent(
           nextPath
         )}`,
       },
