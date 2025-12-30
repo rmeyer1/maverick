@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build --workspace @maverick/web",
-  "installCommand": "npm install",
+  "installCommand": "npm install --include=optional",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs"
 }
