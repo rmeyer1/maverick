@@ -125,7 +125,22 @@ export default function ThreadPage() {
         <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-500">
           <span>Author: {data.thread.author ?? "unknown"}</span>
           <span>•</span>
-          <span>URL: {data.thread.url ?? "n/a"}</span>
+          <span className="flex min-w-0 items-center gap-1">
+            URL:
+            {data.thread.url ? (
+              <a
+                href={data.thread.url}
+                target="_blank"
+                rel="noreferrer"
+                className="truncate text-zinc-600 underline decoration-zinc-300 underline-offset-2 transition hover:text-zinc-900"
+                title={data.thread.url}
+              >
+                {data.thread.url}
+              </a>
+            ) : (
+              <span>n/a</span>
+            )}
+          </span>
         </div>
       </header>
 
