@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUserServer } from "@/lib/supabase/session";
 import UserMenu from "@/components/user-menu";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 export default async function AppLayout({
   children,
@@ -28,9 +29,10 @@ export default async function AppLayout({
           <UserMenu email={user.email} />
         </div>
       </nav>
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-5xl px-4 py-6 pb-24 sm:px-6 sm:py-10 sm:pb-10">
         {children}
       </main>
+      <MobileBottomNav />
     </div>
   );
 }
