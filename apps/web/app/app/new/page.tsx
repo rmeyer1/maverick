@@ -168,15 +168,15 @@ export default function NewThreadPage() {
 
   return (
     <div className="space-y-8">
-      <header className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm">
+      <header className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
-          New Analysis
+          Analyze Reddit Thread
         </p>
         <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
-          Paste a Reddit thread to extract signals
+          Paste a Reddit URL to unlock market signals
         </h2>
         <p className="mt-2 text-sm text-zinc-600">
-          We will ingest the thread, run extraction, and route you to the results page.
+          We will ingest the thread, run extraction, and take you to the results.
         </p>
       </header>
 
@@ -194,9 +194,48 @@ export default function NewThreadPage() {
             value={url}
             onChange={(event) => setUrl(event.target.value)}
           />
+          <p className="mt-3 text-xs text-zinc-500">
+            What you’ll get: Pain points • Buying intent • Entity mentions
+          </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <details className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:hidden">
+          <summary className="cursor-pointer text-sm font-medium text-zinc-700">
+            Provider + model (optional)
+          </summary>
+          <div className="mt-4 grid gap-4">
+            <div>
+              <label className="text-sm font-medium text-zinc-700">Provider</label>
+              <select
+                className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm"
+                value={provider}
+                onChange={(event) => setProvider(event.target.value)}
+              >
+                {providerOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-zinc-700">Model</label>
+              <select
+                className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm"
+                value={model}
+                onChange={(event) => setModel(event.target.value)}
+              >
+                {modelOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </details>
+
+        <div className="hidden gap-4 md:grid md:grid-cols-2">
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <label className="text-sm font-medium text-zinc-700">Provider</label>
             <select
@@ -250,9 +289,21 @@ export default function NewThreadPage() {
           <button
             type="submit"
             disabled={isBusy}
-            className="mt-2 w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-400"
+            className="mt-2 hidden w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-400 sm:inline-flex sm:items-center sm:justify-center"
           >
-            {isBusy ? "Working..." : "Run extraction"}
+            {isBusy ? "Working..." : "Analyze Reddit Thread"}
+          </button>
+        </div>
+
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur sm:hidden">
+          <button
+            type="submit"
+            disabled={isBusy}
+            className="flex w-full items-center justify-between rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-400"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          >
+            <span>{isBusy ? "Working..." : "Analyze Reddit Thread"}</span>
+            <span className="text-base">→</span>
           </button>
         </div>
       </form>

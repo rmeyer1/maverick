@@ -12,6 +12,9 @@ const navItems = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  if (pathname?.startsWith("/app/new")) {
+    return null;
+  }
 
   return (
     <nav
