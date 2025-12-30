@@ -44,6 +44,7 @@ export default function ThreadPage() {
   const [data, setData] = useState<ThreadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showComments, setShowComments] = useState(false);
 
   const extraction = data?.extraction?.extracted_json ?? null;
 
@@ -125,7 +126,22 @@ export default function ThreadPage() {
         <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-500">
           <span>Author: {data.thread.author ?? "unknown"}</span>
           <span>•</span>
-          <span>URL: {data.thread.url ?? "n/a"}</span>
+          <span className="flex min-w-0 items-center gap-1">
+            URL:
+            {data.thread.url ? (
+              <a
+                href={data.thread.url}
+                target="_blank"
+                rel="noreferrer"
+                className="truncate text-zinc-600 underline decoration-zinc-300 underline-offset-2 transition hover:text-zinc-900"
+                title={data.thread.url}
+              >
+                {data.thread.url}
+              </a>
+            ) : (
+              <span>n/a</span>
+            )}
+          </span>
         </div>
       </header>
 
@@ -235,18 +251,45 @@ export default function ThreadPage() {
       )}
 
       <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-semibold">Top comments</h3>
-        <div className="mt-4 space-y-3">
-          {data.comments.map((comment) => (
-            <div key={comment.reddit_id} className="rounded-2xl border border-zinc-100 p-4">
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span>{comment.author ?? "unknown"}</span>
-                <span>Score: {comment.score ?? 0}</span>
+        <button
+          type="button"
+          onClick={() => setShowComments((prev) => !prev)}
+          className="flex w-full items-center justify-between text-left text-lg font-semibold text-zinc-900"
+          aria-expanded={showComments}
+          aria-controls="top-comments"
+        >
+          <span>
+            Top comments
+            <span className="ml-2 text-xs font-medium text-zinc-400">
+              ({data.comments.length})
+            </span>
+          </span>
+          <span
+            className={`text-base text-zinc-400 transition ${
+              showComments ? "rotate-180" : ""
+            }`}
+          >
+            ▾
+          </span>
+        </button>
+        {showComments ? (
+          <div id="top-comments" className="mt-4 space-y-3">
+            {data.comments.map((comment) => (
+              <div
+                key={comment.reddit_id}
+                className="rounded-2xl border border-zinc-100 p-4"
+              >
+                <div className="flex items-center justify-between text-xs text-zinc-400">
+                  <span>{comment.author ?? "unknown"}</span>
+                  <span>Score: {comment.score ?? 0}</span>
+                </div>
+                <p className="mt-2 text-sm text-zinc-700">
+                  {comment.body ?? "[removed]"}
+                </p>
               </div>
-              <p className="mt-2 text-sm text-zinc-700">{comment.body ?? "[removed]"}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : null}
       </section>
     </div>
   );
